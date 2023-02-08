@@ -1,0 +1,17 @@
+[package]
+name = "open-fork"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = { version = "4.1", features = [ "openssl" ] }
+openssl = { version = "0.10" }
+maud = { version="0.24", features = [ "actix-web" ] }
+diesel = { version = "2.0", features = [ "sqlite", "extras" ]}
+diesel_migrations = { version = "2.0" }
+chrono = { version = "0.4", features = [ "serde" ]}
+chrono-tz = { version = "0.8" }
+uuid = { version = "1.1" }
+rand = { version = "0.8" }
+env_logger = { version = "0.10" }
+log = { version = "0.4" }
