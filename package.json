@@ -1,0 +1,17 @@
+{
+  "name": "open-fork",
+  "version": "1.0.0",
+  "description": "Open Fork",
+  "main": "src-js/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:dev": "tsc -p tsconfig.dev.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patrick Bergeron <pbergeron@lunix.pro>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "sass": "^1.58.0"
+  }
+}

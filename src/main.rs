@@ -5,6 +5,7 @@ use actix_web::{
     web::Data,
     App, HttpServer,
 };
+use include_dir::{include_dir, Dir};
 use openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 
 use models::database::{self, DbPool};
@@ -12,6 +13,8 @@ use models::database::{self, DbPool};
 mod models;
 mod pages;
 mod templates;
+
+pub static STATIC_ASSETS: Dir = include_dir!("$OUT_DIR/static");
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
