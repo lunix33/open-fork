@@ -6,8 +6,7 @@ fn main() {
     let out_dir = std::env::var("OUT_DIR").unwrap();
 
     copy_static(&manifest_dir, &out_dir);
-    build_js(&manifest_dir, &out_dir, &profile);
-    build_sass(&manifest_dir, &out_dir, &profile);
+    build_js_scss(&manifest_dir, &out_dir, &profile);
 }
 
 fn copy_static(manifest_dir: &str, out_dir: &str) {
@@ -19,46 +18,33 @@ fn copy_static(manifest_dir: &str, out_dir: &str) {
         .expect("Failed to copy static assets.");
 }
 
-fn build_js(manifest_dir: &str, out_dir: &str, profile: &str) {
-    let tsc_bin = format!("{manifest_dir}/node_modules/.bin/tsc");
-    let output_dir = format!("{out_dir}/static/js");
-    let args = if profile == "debug" {
-        vec!["--project", "tsconfig.dev.json", "--outDir", &output_dir]
+fn build_js_scss(manifest_dir: &str, out_dir: &str, profile: &str) {
+    let vite_bin = format!("{manifest_dir}/node_modules/.bin/vite");
+    let output_dir = format!("{out_dir}/dist");
+    let (args, env) = if profile == "debug" {
+        (
+            vec![
+                "build",
+                "--mode",
+                "development",
+                "--sourcemap",
+                "--outDir",
+                &output_dir,
+            ],
+            "development",
+        )
     } else {
-        vec!["--outDir", &output_dir]
+        (vec!["build", "--outDir", &output_dir], "production")
     };
 
-    let out = Command::new(tsc_bin)
+    let out = Command::new(vite_bin)
         .args(args)
+        .env("NODE_ENV", env)
         .output()
         .expect("Failed to run command.");
 
     println!(
-        "tsc finished with error code: {}\nSTDOUT:\n{}\n---\nSTDERR:\n{}",
-        out.status,
-        String::from_utf8_lossy(&out.stdout),
-        String::from_utf8_lossy(&out.stderr)
-    );
-}
-
-fn build_sass(manifest_dir: &str, out_dir: &str, profile: &str) {
-    let sass_bin = format!("{manifest_dir}/node_modules/.bin/sass");
-    let input_dir = format!("{manifest_dir}/src/");
-    let output_dir = format!("{out_dir}/static/");
-    let composed_dir = format!("{input_dir}:{output_dir}");
-    let args = if profile == "debug" {
-        vec!["--embed-sources", "--embed-source-map", &composed_dir]
-    } else {
-        vec![composed_dir.as_str()]
-    };
-
-    let out = Command::new(sass_bin)
-        .args(args)
-        .output()
-        .expect("Failed to run command.");
-
-    println!(
-        "sass finished with error code: {}\nSTDOUT:\n{}\n---\nSTDERR:\n{}",
+        "vite finished with error code: {}\nSTDOUT:\n{}\n---\nSTDERR:\n{}",
         out.status,
         String::from_utf8_lossy(&out.stdout),
         String::from_utf8_lossy(&out.stderr)
