@@ -16,6 +16,7 @@ rand = { version = "0.8" }
 env_logger = { version = "0.10" }
 log = { version = "0.4" }
 include_dir = { version = "0.7" }
+mime_guess = { version = "2.0" }
 
 [build-dependencies]
 fs_extra = { version = "1.3" }
