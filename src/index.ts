@@ -1,1 +1,1 @@
-alert("Error");
+import "foundation-sites/js/foundation";
