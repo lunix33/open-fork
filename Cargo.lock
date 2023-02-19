@@ -1116,6 +1116,7 @@ dependencies = [
  "mime_guess",
  "openssl",
  "rand",
+ "regex",
  "uuid",
 ]
 

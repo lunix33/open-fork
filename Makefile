@@ -20,6 +20,7 @@ package: $(BUILD_FILES)
 
 db $(DEV_DATABASE_URL):
 	rm -f $(DEV_DATABASE_URL)
+	rm -f $(DEV_DATABASE_SEED)
 	diesel migration run $(DIESEL_DB_ARGS)
 
 dev-db $(DEV_DATABASE_SEED): $(DEV_DATABASE_URL)

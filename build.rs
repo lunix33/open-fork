@@ -11,7 +11,7 @@ fn main() {
 
 fn copy_static(manifest_dir: &str, out_dir: &str) {
     let static_source = format!("{manifest_dir}/static");
-    let static_destination = format!("{out_dir}");
+    let static_destination = out_dir.to_string();
     println!("Copy '{static_source}' to '{static_destination}'");
     let copy_options = fs_extra::dir::CopyOptions::new().overwrite(true);
     fs_extra::dir::copy(static_source, static_destination, &copy_options)

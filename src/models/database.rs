@@ -1,5 +1,5 @@
 use diesel::{
-    r2d2::{ConnectionManager, Pool, PooledConnection},
+    r2d2::{ConnectionManager, Pool},
     sqlite::Sqlite,
     SqliteConnection,
 };
@@ -11,7 +11,6 @@ const MIGRATION: EmbeddedMigrations = embed_migrations!("./migrations/db");
 
 pub type DbConnection = SqliteConnection;
 pub type DbConnectionManager = ConnectionManager<DbConnection>;
-pub type DbPooledConnection = PooledConnection<DbConnectionManager>;
 pub type DbPool = Pool<DbConnectionManager>;
 pub type DbBackend = Sqlite;
 
@@ -19,7 +18,7 @@ pub fn connect_pool(database_url: &str) -> DbPool {
     let manager = ConnectionManager::<DbConnection>::new(database_url);
     let pool = Pool::builder()
         .build(manager)
-        .expect(&format!("Unable to open database: {}", database_url));
+        .unwrap_or_else(|e| panic!("Unable to open database '{database_url}': {e}"));
 
     let mut connection = pool.get().unwrap();
     run_migrations(&mut connection).expect("Migrations failed.");
