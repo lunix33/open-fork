@@ -1117,6 +1117,7 @@ dependencies = [
  "openssl",
  "rand",
  "regex",
+ "serde",
  "uuid",
 ]
 

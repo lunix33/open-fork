@@ -7,6 +7,7 @@ edition = "2021"
 actix-web = { version = "4.1", features = [ "openssl" ] }
 openssl = { version = "0.10" }
 maud = { version="0.24", features = [ "actix-web" ] }
+serde = { version="1.0" }
 diesel = { version = "2.0", features = [ "sqlite", "extras" ]}
 diesel_migrations = { version = "2.0" }
 chrono = { version = "0.4", features = [ "serde" ]}

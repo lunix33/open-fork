@@ -1,5 +1,5 @@
 pub mod database;
-mod page;
+pub mod pagination;
 mod schema;
 
-mod recipe;
+pub mod recipe;

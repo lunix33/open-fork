@@ -11,6 +11,16 @@ pub struct RecipeFilterOptions {
     pub last_updated: Option<NaiveDateTime>,
 }
 
+impl Default for RecipeFilterOptions {
+    fn default() -> Self {
+        Self {
+            name: None,
+            has_image: None,
+            last_updated: None,
+        }
+    }
+}
+
 type FilterExpressionType = sql_types::Bool;
 type FilterExpression =
     Box<dyn BoxableExpression<recipes::table, DbBackend, SqlType = FilterExpressionType>>;
@@ -23,7 +33,7 @@ impl AsExpression<FilterExpressionType> for RecipeFilterOptions {
 
         let mut expr = None;
         if let Some(name_filter) = self.name {
-            expr = attach_expression(expr, Box::new(name.like(name_filter)));
+            expr = attach_expression(expr, Box::new(name.like(format!("%{name_filter}%"))));
         }
         if let Some(true) = self.has_image {
             expr = attach_expression(expr, Box::new(image.is_not_null()));
@@ -40,8 +50,6 @@ impl AsExpression<FilterExpressionType> for RecipeFilterOptions {
         }
     }
 }
-
-//impl AppearsOnTable<recipes::dsl::recipes> for RecipeFilterOptions {}
 
 fn attach_expression(
     current: Option<FilterExpression>,

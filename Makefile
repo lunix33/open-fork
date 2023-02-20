@@ -23,7 +23,7 @@ db $(DEV_DATABASE_URL):
 	rm -f $(DEV_DATABASE_SEED)
 	diesel migration run $(DIESEL_DB_ARGS)
 
-dev-db $(DEV_DATABASE_SEED): $(DEV_DATABASE_URL)
+db-seed $(DEV_DATABASE_SEED): $(DEV_DATABASE_URL)
 	diesel migration run $(DIESEL_SEED_ARGS)
 	touch $(DEV_DATABASE_SEED)
 
@@ -36,6 +36,7 @@ dev: $(DEV_CERT) $(DEV_DATABASE_SEED)
 new-migration: $(DEV_DATABASE_URL)
 	@[ "$(NAME)" == "" ] && echo "NAME argument required" && exit 1 || true
 	diesel migration generate $(DIESEL_DB_ARGS) $(NAME)
+	sleep 1
 	diesel migration generate $(DIESEL_SEED_ARGS) $(NAME)
 
 deps:

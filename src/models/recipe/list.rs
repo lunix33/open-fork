@@ -4,6 +4,7 @@ use diesel::{expression::AsExpression, prelude::*};
 use super::{Recipe, RecipeFilterOptions};
 use crate::models::{
     database::{DbBackend, DbConnection},
+    pagination::PaginationOptions,
     schema::recipes,
 };
 
@@ -18,14 +19,25 @@ pub struct RecipeList {
 }
 
 impl RecipeList {
-    pub fn filter(conn: &mut DbConnection, filter: RecipeFilterOptions) -> QueryResult<Vec<Self>> {
-        use self::recipes::dsl::*;
-
-        let mut query = recipes.into_boxed::<DbBackend>();
-        query = query.order_by(created_on);
+    pub fn filter(
+        conn: &mut DbConnection,
+        filter: RecipeFilterOptions,
+        pagination: Option<PaginationOptions>,
+    ) -> QueryResult<Vec<Self>> {
+        let mut query = recipes::table.into_boxed::<DbBackend>();
         query = query.filter(filter.as_expression());
 
+        if let Some(pagination) = pagination {
+            query = query
+                .offset((pagination.page * pagination.limit).into())
+                .limit(pagination.limit.into());
+        }
+
         query.load::<Self>(conn)
+    }
+
+    pub fn count(conn: &mut DbConnection) -> QueryResult<i64> {
+        recipes::table.count().get_result(conn)
     }
 }
 
