@@ -8,23 +8,26 @@ use actix_web::{
 use include_dir::{include_dir, Dir, DirEntry};
 use openssl::ssl::{SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 
-use models::database::{self, DbPool};
-
 mod assets_endpoint;
 mod models;
 mod pages;
-mod templates;
+mod result;
+mod components;
+mod layout;
+
+use models::database::{self, DbPool};
+pub use result::*;
 
 pub static STATIC_ASSETS: Dir = include_dir!("$OUT_DIR");
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> ApplicationResult<()> {
     setup_logger();
 
     log::debug!("Built in static assets:");
     print_tree(&STATIC_ASSETS, 1);
 
-    let db_connection = connect_db();
+    let db_connection = connect_db().await?;
     let listen = std::env::var("OF_HOST").unwrap_or(String::from("localhost:4000"));
 
     let server = HttpServer::new(move || {
@@ -39,7 +42,9 @@ async fn main() -> std::io::Result<()> {
     .run();
 
     log::info!("Listening to https://{}", listen);
-    server.await
+    server.await?;
+
+    Ok(())
 }
 
 /// Initialize the logger
@@ -71,12 +76,14 @@ fn setup_ssl_builder() -> SslAcceptorBuilder {
     builder
 }
 
-fn connect_db() -> DbPool {
+/// Connect to the database
+async fn connect_db() -> ApplicationResult<DbPool> {
     let database_url = database::env_url();
     log::info!("Using database `{}`.", &database_url);
-    database::connect_pool(&database_url)
+    database::connect_pool(&database_url).await
 }
 
+/// Print a file tree
 fn print_tree(root: &Dir, level: usize) {
     let indent = "  ".repeat(level);
     for entry in root.entries() {

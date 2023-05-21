@@ -1,39 +1,22 @@
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    sqlite::Sqlite,
-    SqliteConnection,
-};
-use diesel_migrations::{
-    embed_migrations, EmbeddedMigrations, HarnessWithOutput, MigrationHarness,
-};
+use sqlx::sqlite::{Sqlite, SqlitePool};
 
-const MIGRATION: EmbeddedMigrations = embed_migrations!("./migrations/db");
+use crate::ApplicationResult;
 
-pub type DbConnection = SqliteConnection;
-pub type DbConnectionManager = ConnectionManager<DbConnection>;
-pub type DbPool = Pool<DbConnectionManager>;
-pub type DbBackend = Sqlite;
+// static MIGRATOR: Migrator = sqlx::migrate!("migrations/db");
 
-pub fn connect_pool(database_url: &str) -> DbPool {
-    let manager = ConnectionManager::<DbConnection>::new(database_url);
-    let pool = Pool::builder()
-        .build(manager)
-        .unwrap_or_else(|e| panic!("Unable to open database '{database_url}': {e}"));
+pub type DbPool = SqlitePool;
+pub type DbType = Sqlite;
 
-    let mut connection = pool.get().unwrap();
-    run_migrations(&mut connection).expect("Migrations failed.");
+pub async fn connect_pool(database_url: &str) -> ApplicationResult<DbPool> {
+    let pool = DbPool::connect_lazy(database_url.into())?;
 
-    pool
+    let mut migrator = sqlx::migrate!("migrations/db");
+    migrator.set_ignore_missing(true);
+    migrator.run(&pool).await?;
+
+    Ok(pool)
 }
 
 pub fn env_url() -> String {
-    std::env::var("OF_DATABASE_URL").unwrap_or(String::from("./db.sqlite3"))
-}
-
-fn run_migrations(
-    connection: &mut impl MigrationHarness<DbBackend>,
-) -> diesel::migration::Result<()> {
-    HarnessWithOutput::write_to_stdout(connection).run_pending_migrations(MIGRATION)?;
-
-    Ok(())
+    std::env::var("OF_DATABASE_URL").unwrap_or(String::from("sqlite:db.sqlite3"))
 }

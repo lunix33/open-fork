@@ -4,21 +4,23 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = { version = "4.1", features = [ "openssl" ] }
+actix-web = { version = "4.3", features = [ "openssl" ] }
+sqlx = { version = "0.6", features = [ "runtime-tokio-native-tls", "sqlite", "chrono", "migrate" ] }
 openssl = { version = "0.10" }
-maud = { version="0.24", features = [ "actix-web" ] }
-serde = { version="1.0" }
-diesel = { version = "2.0", features = [ "sqlite", "extras" ]}
-diesel_migrations = { version = "2.0" }
+maud = { version="0.25", features = [ "actix-web" ] }
+serde = { version="1.0", features = [ "derive" ]}
 chrono = { version = "0.4", features = [ "serde" ]}
 chrono-tz = { version = "0.8" }
-uuid = { version = "1.1" }
+uuid = { version = "1.3" }
 rand = { version = "0.8" }
 env_logger = { version = "0.10" }
 log = { version = "0.4" }
 include_dir = { version = "0.7" }
 mime_guess = { version = "2.0" }
 regex = { version = "1" }
+thiserror = { version = "1.0" }
+futures = { version = "0.3" }
+base64 = { version = "0.21" }
 
 [build-dependencies]
 fs_extra = { version = "1.3" }

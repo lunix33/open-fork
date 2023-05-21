@@ -1,0 +1,16 @@
+$pad: 1rem;
+
+$border-size: 1px;
+$border-color: black;
+$border-radius: 3px;
+
+$shadow-offset: 0.2rem;
+$shadow-blur: 0.2rem;
+$shadow-color: hsla(0deg, 0%, 0%, 0.2);
+
+article.card {
+  padding: $pad;
+  border: $border-size solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $shadow-offset $shadow-offset $shadow-blur $shadow-blur $shadow-color;
+}

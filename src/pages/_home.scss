@@ -1,0 +1,20 @@
+@use "../variables" as vars;
+
+$columns: 3;
+$column-adjustment: 2.5%;
+$gap: 1rem;
+
+section.recipes {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+  
+  .card {
+    flex: 1 0 ((100% / $columns) - ($column-adjustment * $columns));
+  }
+
+  @media screen and (min-width: vars.$bp-md) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

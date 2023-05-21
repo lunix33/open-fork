@@ -1,0 +1,31 @@
+@use "../../variables.scss" as vars;
+
+$width: 85%;
+$max-width-diff: 100px;
+$max-height: 95%;
+$pad: 1rem;
+$color: hsla(0deg, 0%, 98%, 1);
+$border-color: hsla(0deg, 0%, 0%, 1);
+$border-size: 1px;
+$border-radius: 5px;
+
+main {
+  margin: auto;
+  padding: $pad;
+  border-left: $border-size solid $border-color;
+  border-right: $border-size solid $border-color;
+  background-color: $color;
+  width: $width;
+  height: 100%;
+
+  @media screen and (min-width: vars.$bp-md) {
+    height: $max-height;
+    border: $border-size solid $border-color;
+    border-radius: $border-radius;
+  }
+  
+  @media screen and (min-width: vars.$bp-xl) {
+    max-width: vars.$bp-xl - $max-width-diff;
+  }
+}
+

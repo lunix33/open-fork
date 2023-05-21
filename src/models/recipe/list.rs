@@ -1,54 +1,55 @@
 use chrono::NaiveDateTime;
-use diesel::{expression::AsExpression, prelude::*};
+use sqlx::{FromRow, Row};
 
-use super::{Recipe, RecipeFilterOptions};
+use super::RecipeFilterOptions;
 use crate::models::{
-    database::{DbBackend, DbConnection},
+    database::DbPool,
+    ext::{Applyable, QueryBuilderExt},
     pagination::PaginationOptions,
-    schema::recipes,
 };
 
-#[derive(Debug, Clone, Queryable, Identifiable)]
-#[diesel(table_name = recipes, primary_key(id))]
+#[derive(Debug, Clone, FromRow)]
 pub struct RecipeList {
     pub id: String,
     pub name: String,
     pub image: Option<Vec<u8>>,
+    pub image_mime: Option<String>,
     pub created_on: NaiveDateTime,
     pub updated_on: NaiveDateTime,
 }
 
 impl RecipeList {
-    pub fn filter(
-        conn: &mut DbConnection,
-        filter: RecipeFilterOptions,
+    pub async fn filter(
+        conn: &DbPool,
+        filter: &RecipeFilterOptions,
         pagination: Option<PaginationOptions>,
-    ) -> QueryResult<Vec<Self>> {
-        let mut query = recipes::table.into_boxed::<DbBackend>();
-        query = query.filter(filter.as_expression());
+    ) -> sqlx::Result<Vec<Self>> {
+        let mut query = sqlx::QueryBuilder::new("");
+        query.select(
+            &super::TABLE,
+            &[
+                super::Fields::Id,
+                super::Fields::Name,
+                super::Fields::Image,
+                super::Fields::ImageMime,
+                super::Fields::CreatedOn,
+                super::Fields::UpdatedOn,
+            ],
+        );
 
+        filter.apply(&mut query);
         if let Some(pagination) = pagination {
-            query = query
-                .offset((pagination.page * pagination.limit).into())
-                .limit(pagination.limit.into());
+            query.apply(&pagination);
         }
 
-        query.load::<Self>(conn)
+        query.build_query_as::<Self>().fetch_all(conn).await
     }
 
-    pub fn count(conn: &mut DbConnection) -> QueryResult<i64> {
-        recipes::table.count().get_result(conn)
-    }
-}
+    pub async fn count(conn: &DbPool, filter: &RecipeFilterOptions) -> sqlx::Result<i64> {
+        let mut query =
+            sqlx::QueryBuilder::new(format!(r#"SELECT COUNT(*) FROM "{}""#, super::TABLE));
+        filter.apply(&mut query);
 
-impl From<Recipe> for RecipeList {
-    fn from(value: Recipe) -> Self {
-        Self {
-            id: value.id,
-            name: value.name,
-            image: value.image,
-            created_on: value.created_on,
-            updated_on: value.updated_on,
-        }
+        query.build().fetch_one(conn).await?.try_get::<i64, _>(0)
     }
 }
